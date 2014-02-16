@@ -1,0 +1,19 @@
+<package>
+  <description brief="PlannerPkg">
+
+     PlannerPkg
+
+  </description>
+  <author>Zeus</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/PlannerPkg</url>
+  <depend package="std_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+
+</package>
+
+

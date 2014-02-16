@@ -1,0 +1,56 @@
+/***********************************************************************************************************************
+FILENAME:   listener.cpp
+AUTHORS:    Jesus Alcala
+
+DESCRIPTION:
+A test file for the planner.
+
+PUBLISHES:  NA
+SUBSCRIBES: "GlobalMap" nav_msgs::OccupancyGrid
+SERVICES:   NA
+***********************************************************************************************************************/
+
+
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "nav_msgs/OccupancyGrid.h"
+#include "Dstar.h"
+
+void plan(const nav_msgs::OccupancyGrid::ConstPtr& msg);
+
+list<state> mypath;
+Dstar *dstar;
+/***********************************************************************************************************************
+plan(const nav_msgs::OccupancyGrid::ConstPtr& msg)
+handles new occupancy grid
+Creates a path from start to goal ***********************************************************************************************************************/
+void plan(const nav_msgs::OccupancyGrid::ConstPtr& msg)
+{
+	int row,col;
+	int height= msg->info.height;
+	int width= msg->info.width;
+	//Add obstacles from OccupancyGrid to D* planner
+	for(row=0;row<height;row++)
+		for(col=0;col<width;col++)
+			if(msg->data[( (row*width) + col )]==-1)		
+				dstar->updateCell(row,col,-1);
+	dstar->replan();  	          // Create a path
+	mypath = dstar->getPath();     // retrieve path
+
+	//print path for debug
+	ROS_INFO("Path:");
+	for (list<state>::iterator it = mypath.begin(); it != mypath.end(); it++)
+		ROS_INFO("[%d,%d]",it->x,it->y );
+}
+
+int main(int argc, char **argv)
+{
+	ros::init(argc, argv, "Path_Planner");
+	ros::NodeHandle nh;
+	ros::Subscriber GlobalMapSub = nh.subscribe("GlobalMap", 1, plan);
+	dstar = new Dstar();
+	dstar->init(0,0,2,1);	//Initialize D* with start at (0,0) and goal at (2,1)
+	while(ros::ok()){
+		ros::spin();
+	}
+}
